@@ -7,6 +7,9 @@ import { fileURLToPath } from "url";
 
 export default defineConfig({
   plugins: [react()],
+  build: {
+    outDir: "dist",
+  },
   resolve: {
     alias: {
       "@components": path.resolve(__dirname, "./src/components"),
