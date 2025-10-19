@@ -106,8 +106,8 @@ export function ScheduleProvider({ children }: ScheduleProviderProps) {
         ...prev,
         activities: initialActivities,
         facilities: initialFacilities,
-        initialActivities,
-        initialFacilities,
+        initialActivities: initialActivities,
+        initialFacilities: initialFacilities,
       }));
     } catch (error) {
       console.error("Error loading filter options:", error);
@@ -309,9 +309,9 @@ export function ScheduleProvider({ children }: ScheduleProviderProps) {
             page: pageNumber.toString(),
           });
         }
-        const pageData = new PageModel<Schedule>(page);
-        schedules = pageData.content;
-        setHasMoreSchedules(pageData.hasNext);
+
+        schedules = page.content;
+        setHasMoreSchedules(page.page.number + 1 < page.page.totalPages);
         setCurrentPage(pageNumber);
 
         if (append) {
