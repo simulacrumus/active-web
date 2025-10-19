@@ -23,6 +23,8 @@ export class AxiosApiClient implements ApiClient {
       headers: {
         "Content-Type": "application/json",
         "x-api-key": apiKey,
+        "x-app-type": "vite-react",
+        "x-app-version": "1.0.1",
       },
       transformResponse: [
         (data) => {
