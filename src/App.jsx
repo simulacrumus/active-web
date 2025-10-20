@@ -16,6 +16,25 @@ function App() {
   const { i18n } = useTranslation();
 
   useEffect(() => {
+    let deviceId = localStorage.getItem("deviceId");
+    if (!deviceId) {
+      const generateUuid = () => {
+        if (typeof crypto !== "undefined" && crypto.randomUUID) {
+          return crypto.randomUUID();
+        }
+        return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
+          /[xy]/g,
+          function (c) {
+            const r = (Math.random() * 16) | 0;
+            const v = c === "x" ? r : (r & 0x3) | 0x8;
+            return v.toString(16);
+          }
+        );
+      };
+      deviceId = generateUuid();
+      localStorage.setItem("deviceId", deviceId);
+    }
+
     const termsAccepted = sessionStorage.getItem("termsAccepted");
     if (termsAccepted === "true") {
       setHasAccepted(true);

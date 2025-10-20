@@ -17,7 +17,7 @@ const parseWithDates = (jsonString: string) => {
 export class AxiosApiClient implements ApiClient {
   private client: AxiosInstance;
 
-  constructor(baseURL: string, apiKey: string) {
+  constructor(baseURL: string, apiKey: string, deviceId: string) {
     this.client = axios.create({
       baseURL: baseURL,
       headers: {
@@ -25,6 +25,7 @@ export class AxiosApiClient implements ApiClient {
         "x-api-key": apiKey,
         "x-app-type": "vite-react",
         "x-app-version": "1.0.1",
+        "x-device-id": deviceId,
       },
       transformResponse: [
         (data) => {
