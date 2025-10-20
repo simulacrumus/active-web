@@ -21,7 +21,6 @@ import {
   DayOfWeek,
   HourOfDay,
   ScheduleSort,
-  // PageModel,
 } from "@types";
 import { PageModel } from "./../../types/Page";
 import {
@@ -90,7 +89,6 @@ export function ScheduleProvider({ children }: ScheduleProviderProps) {
 
   const didLoadRef = useRef(false);
   const lastRequestRef = useRef<symbol | null>(null);
-  const isInitialMount = useRef(true);
 
   const locationData = useLocation();
 
@@ -151,7 +149,7 @@ export function ScheduleProvider({ children }: ScheduleProviderProps) {
         setFilterOptions((prev: FilterOptions) => ({
           ...prev,
           facilities,
-          activities: prev.activities, // keep existing
+          activities: prev.activities,
         }));
 
         setFilters((prev: FilterState) => ({
@@ -176,7 +174,6 @@ export function ScheduleProvider({ children }: ScheduleProviderProps) {
       lastRequestRef.current = token;
 
       try {
-        // Update facility first
         setFilters((prev: FilterState) => ({
           ...prev,
           selectedFacility: facility,
@@ -186,7 +183,7 @@ export function ScheduleProvider({ children }: ScheduleProviderProps) {
           ? await activityService.getActivitiesByFacility(facility.id)
           : filterOptions.initialActivities;
 
-        if (lastRequestRef.current !== token) return; // Ignore outdated requests
+        if (lastRequestRef.current !== token) return;
 
         const availableIds = new Set(activities.map((a: Activity) => a.id));
 
@@ -257,14 +254,8 @@ export function ScheduleProvider({ children }: ScheduleProviderProps) {
     setFilters((prev: FilterState) => ({ ...prev, searchQuery: query }));
   }, []);
 
-  const fetchSchedulesPageRef =
-    useRef<(pageNumber: number, append: boolean) => Promise<void>>(undefined);
-
-  useEffect(() => {
-    fetchSchedulesPageRef.current = async (
-      pageNumber: number = 0,
-      append: boolean = false
-    ): Promise<void> => {
+  const fetchSchedulesPage = useCallback(
+    async (pageNumber: number = 0, append: boolean = false): Promise<void> => {
       if (append) {
         setIsLoadingNextPageSchedules(true);
       } else {
@@ -328,20 +319,20 @@ export function ScheduleProvider({ children }: ScheduleProviderProps) {
           setIsLoadingSchedules(false);
         }
       }
-    };
-  });
+    },
+    [filters, sort, locationData.location]
+  );
 
   const loadMoreSchedules = useCallback(async (): Promise<void> => {
     if (!hasMoreSchedules || isLoadingNextPageSchedules || isLoadingSchedules)
       return;
-    if (fetchSchedulesPageRef.current) {
-      await fetchSchedulesPageRef.current(currentPage + 1, true);
-    }
+    await fetchSchedulesPage(currentPage + 1, true);
   }, [
     currentPage,
     hasMoreSchedules,
     isLoadingNextPageSchedules,
     isLoadingSchedules,
+    fetchSchedulesPage,
   ]);
 
   useEffect(() => {
@@ -349,15 +340,13 @@ export function ScheduleProvider({ children }: ScheduleProviderProps) {
       () => {
         setCurrentPage(0);
         setHasMoreSchedules(false);
-        if (fetchSchedulesPageRef.current) {
-          fetchSchedulesPageRef.current(0, false);
-        }
+        fetchSchedulesPage(0, false);
       },
       filters.searchQuery ? 300 : 0
     );
 
     return () => clearTimeout(timeoutId);
-  }, [filters, sort, locationData.location]);
+  }, [filters, sort, locationData.location, fetchSchedulesPage]);
 
   const resetFilters = useCallback((): void => {
     setFilters(initialFilters);
@@ -375,24 +364,6 @@ export function ScheduleProvider({ children }: ScheduleProviderProps) {
         filters.searchQuery.trim() !== "")
     );
   }, [filters]);
-
-  const getApiParams = (): Record<string, string> => {
-    const params: Record<string, string> = {};
-    if (filters.pageNumber) params["page"] = filters.pageNumber.toString();
-    if (filters.size) params["size"] = filters.size.toString();
-    if (filters.selectedDayOfWeek)
-      params["day"] = filters.selectedDayOfWeek.id.toString();
-    if (filters.selectedHour)
-      params["time"] = filters.selectedHour.id.toString();
-    if (sort) params["sort"] = sort;
-    if (sort === "Nearby" && locationData.location) {
-      params["latitude"] = locationData.location.latitude.toString();
-      params["longitude"] = locationData.location.longitude.toString();
-    }
-    if (filters.searchQuery && filters.searchQuery.trim() !== "")
-      params["q"] = filters.searchQuery.trim();
-    return params;
-  };
 
   const value: ScheduleContextValue = {
     filters,
