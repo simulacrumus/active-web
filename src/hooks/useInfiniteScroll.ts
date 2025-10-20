@@ -1,4 +1,3 @@
-// hooks/useInfiniteScroll.ts
 import { useEffect, useRef, useCallback } from "react";
 
 interface UseInfiniteScrollOptions {
@@ -34,19 +33,31 @@ export function useInfiniteScroll({
       threshold: 0,
     };
 
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+    }
+
     observerRef.current = new IntersectionObserver(handleObserver, options);
 
     const currentSentinel = sentinelRef.current;
     if (currentSentinel) {
       observerRef.current.observe(currentSentinel);
+
+      if (hasMore && !isLoading) {
+        const rect = currentSentinel.getBoundingClientRect();
+        const isVisible = rect.top < window.innerHeight + threshold;
+        if (isVisible) {
+          onLoadMore();
+        }
+      }
     }
 
     return () => {
-      if (observerRef.current && currentSentinel) {
-        observerRef.current.unobserve(currentSentinel);
+      if (observerRef.current) {
+        observerRef.current.disconnect();
       }
     };
-  }, [handleObserver, threshold]);
+  }, [handleObserver, threshold, hasMore, isLoading, onLoadMore]);
 
   return sentinelRef;
 }

@@ -35,24 +35,22 @@ export const ScheduleList: React.FC = (): React.ReactElement => {
         </div>
       );
     }
+
     return (
-      <div className="w-full flex flex-col gap-6">
+      <>
         {schedules.length === 0 && !isLoading && (
           <div className="text-center py-10 text-gray-600">
             {t("schedule.empty")}
           </div>
         )}
-
         {schedules.map((schedule: Schedule) => (
           <ScheduleCard key={schedule.id} schedule={schedule} />
         ))}
-        <div ref={sentinelRef} className="h-4" />
         {isLoadingNextPageSchedules && (
           <div className="text-center py-4">
             <span className="text-gray-500">{t("schedule.loadingMore")}</span>
           </div>
         )}
-
         {!hasMoreSchedules && schedules.length > 0 && (
           <div className="text-center py-4">
             <span className="text-gray-500">
@@ -60,17 +58,20 @@ export const ScheduleList: React.FC = (): React.ReactElement => {
             </span>
           </div>
         )}
-      </div>
+      </>
     );
   };
 
   return (
     <div className="w-full items-center justify-center px-4 md:pr-8 py-4">
       <ScheduleListHeader />
-      <ScheduleListContent
-        isLoading={isLoadingSchedules}
-        schedules={schedules}
-      />
+      <div className="w-full flex flex-col gap-6">
+        <ScheduleListContent
+          isLoading={isLoadingSchedules}
+          schedules={schedules}
+        />
+        <div ref={sentinelRef} className="h-4" />
+      </div>
     </div>
   );
 };
