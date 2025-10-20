@@ -374,11 +374,14 @@ export const TermsContent: React.FC<TermsContentProps> = ({
             <span className="font-bold">{t.agreement.button}</span>{" "}
             {t.agreement.continuation}
           </p>
+
           <button
             onClick={onAccept}
-            className="px-8 py-3 rounded-lg font-semibold bg-blue-600 text-white hover:bg-blue-700 shadow-lg hover:shadow-xl transition-all"
+            className="px-1 py-2 rounded-full hover:bg-gray-100 transition-all"
           >
-            {t.agreeButton}
+            <span className="px-4 py-2 bg-gray-700 text-white rounded-full ">
+              {t.agreeButton}
+            </span>
           </button>
         </div>
       </div>
